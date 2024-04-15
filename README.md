@@ -16,3 +16,5 @@ To install the application, follow these steps:
 2. Navigate into the project directory: `cd client && cd server`
 3. Install the dependencies: `npm install`
 4. Start the server: `npm run start`
+
+![App Screenshot](./app-ss.png "Screenshot of the App")
