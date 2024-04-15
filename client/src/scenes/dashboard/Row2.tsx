@@ -136,7 +136,7 @@ const Row2 = () => {
           <Box ml="-0.7rem" flexBasis="40%" textAlign="center">
             <Typography variant="h5">Target Savings</Typography>
             <Typography m="0.3rem 0" variant="h3" color={palette.primary[300]}>
-              $6700
+              $6000
             </Typography>
             <Typography variant="h6">
               Finance goals of the savings that is desired

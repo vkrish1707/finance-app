@@ -84,7 +84,7 @@ const Predictions = () => {
             tickFormatter={(v) => `$${v}`}
           >
             <Label
-              value="Revenue in USD"
+              value="Revenue in CAD"
               angle={-90}
               offset={-5}
               position="insideLeft"

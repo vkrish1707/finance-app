@@ -8,7 +8,7 @@ import {
 } from "@/state/api";
 import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid, GridCellParams } from "@mui/x-data-grid";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Cell, Pie, PieChart } from "recharts";
 
 const Row3 = () => {
@@ -18,6 +18,21 @@ const Row3 = () => {
   const { data: kpiData } = useGetKpisQuery();
   const { data: productData } = useGetProductsQuery();
   const { data: transactionData } = useGetTransactionsQuery();
+
+  const [categoryTotals, setCategoryTotals] = useState<{ id: number; category: string; total: number }[]>([]);
+
+  useEffect(() => {
+    const totals = productData?.reduce((totals, product) => {
+      if (product.category in totals) {
+        totals[product.category] += product.price;
+      } else {
+        totals[product.category] = product.price;
+      }
+      return totals;
+    }, {});
+  
+    setCategoryTotals(Object.entries(totals || {}).map(([category, total], id) => ({ id, category, total: parseFloat(total?.toFixed(2)) })));
+  }, [productData]);
 
   const pieChartData = useMemo(() => {
     if (kpiData) {
@@ -39,6 +54,7 @@ const Row3 = () => {
     }
   }, [kpiData]);
 
+
   const productColumns = [
     {
       field: "name",
@@ -53,6 +69,21 @@ const Row3 = () => {
       renderCell: (params: GridCellParams) => `$${params.value}`,
     },
 
+  ];
+
+  const categoryColumns = [
+    {
+      field: "category",
+      headerName: "Category",
+      flex: 0.5,
+      renderCell: (params: GridCellParams) => `${params.value}`,
+    },
+    {
+      field: "total",
+      headerName: "Total",
+      flex: 0.5,
+      renderCell: (params: GridCellParams) => `$${params.value}`,
+    },
   ];
 
   const transactionColumns = [
@@ -101,13 +132,13 @@ const Row3 = () => {
             },
           }}
         >
-          <DataGrid
-            columnHeaderHeight={25}
-            rowHeight={35}
-            hideFooter={true}
-            rows={productData || []}
-            columns={productColumns}
-          />
+<DataGrid
+  columnHeaderHeight={25}
+  rowHeight={35}
+  hideFooter={true}
+  rows={categoryTotals}
+  columns={categoryColumns}
+/>
         </Box>
       </DashboardBox>
       {/* <DashboardBox gridArea="h">
