@@ -16,7 +16,7 @@ const Navbar = (props: Props) => {
       <FlexBetween gap="0.75rem">
         <MonetizationOnIcon sx={{ fontSize: "28px" }} />
         <Typography variant="h4" fontSize="16px">
-          VK's Finance
+          Bhanu's Finance
         </Typography>
       </FlexBetween>
 
