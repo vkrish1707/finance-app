@@ -1,5 +1,17 @@
+const mongoose = require('mongoose');
 const _ = require('lodash');
 
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/yourDatabaseName', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+// Define schema and model
+const ipDynamicSchema = new mongoose.Schema({}, { strict: false });
+const ipDynamicModel = mongoose.model('ipReuse', ipDynamicSchema);
+
+// Function to convert object keys to camel case
 const convertKeysToCamelCase = (obj) => {
   const newObj = {};
 
@@ -15,17 +27,44 @@ const convertKeysToCamelCase = (obj) => {
   return newObj;
 };
 
-// Example usage:
-const inputObj = {
-  'first_name': 'John',
-  'last_name': 'Doe',
-  'email_address': 'john.doe@example.com',
-  'address': {
-    'street_address': '123 Main St',
-    'city_name': 'Anytown',
-    'postal_code': '12345'
+// Function to process documents in chunks
+const processDocumentsInChunks = async () => {
+  const chunkSize = 100; // Define the size of each chunk
+  let skip = 0;
+  let hasMoreDocuments = true;
+
+  while (hasMoreDocuments) {
+    const docs = await ipDynamicModel.find().skip(skip).limit(chunkSize);
+    if (docs.length === 0) {
+      hasMoreDocuments = false;
+      break;
+    }
+
+    for (const doc of docs) {
+      const originalDoc = doc.toObject();
+      const transformedDoc = convertKeysToCamelCase(originalDoc);
+
+      try {
+        // Insert the transformed document
+        await ipDynamicModel.create(transformedDoc);
+        // Delete the original document
+        await ipDynamicModel.deleteOne({ _id: originalDoc._id });
+        // Log the transformed document
+        console.log('Processed Document:', transformedDoc);
+      } catch (error) {
+        console.error('Error processing document:', originalDoc, error);
+      }
+    }
+
+    skip += chunkSize;
   }
+  
+  console.log('All documents processed.');
 };
 
-const outputObj = convertKeysToCamelCase(inputObj);
-console.log(outputObj);
+// Run the processing function
+processDocumentsInChunks().catch((error) => {
+  console.error('Error processing documents:', error);
+}).finally(() => {
+  mongoose.connection.close();
+});
